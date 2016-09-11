@@ -1,13 +1,16 @@
 ---
 
+## FIXME! travis fatal: [localhost]: FAILED! => {"changed": false, "failed": true, "invocation": {"module_args": {"checksum_algorithm": "sha1", "follow": false, "get_checksum": true, "get_md5": true, "mime": false, "path": "/tmp/kitchen/tmp/dupont.asc"}, "module_name": "stat"}, "msg": "Permission denied"}
+##  https://travis-ci.org/juju4/ansible-mig-api/builds/159159657
 - stat: path={{ pubkeyfile }}
   register: localkey
+  ignore_errors: true
 - name: recover pubkeyfile if not local
   copy: "src={{ pubkeyfile }} dest=/tmp/{{ pubkeyfile | basename }} mode=0400"
-  when: not localkey.stat.exists
+  when: localkey is defined and not localkey.stat.exists
 - set_fact:
     pubkeyfile: /tmp/{{ pubkeyfile | basename }}
-  when: not localkey.stat.exists
+  when: localkey is defined and not localkey.stat.exists
 
 ## /investigator is not returning a list, need to browse per investigatorid
 ## but api knows not to recreate same user :)

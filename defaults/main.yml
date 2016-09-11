@@ -1,0 +1,70 @@
+---
+
+### server
+mig_user: "_mig"
+
+mig_gover: 1.6.2
+mig_gopath: "/home/{{ mig_user }}/go"
+mig_src: "{{ mig_gopath }}/src/mig.ninja/mig"
+mig_api_host: localhost
+#mig_api_port: 51664
+mig_api_port: 1664
+mig_url: "http://{{ mig_api_host }}:{{ mig_api_port }}"
+#mig_url: "https://{{ mig_api_host }}:{{ mig_api_port }}"
+
+mig_enable_auth: true
+
+mig_db_host: localhost
+mig_db_port: 5432
+mig_db_migadmin_pass: xxx
+mig_db_migapi_pass: xxx
+mig_db_migscheduler_pass: xxx
+
+mig_rabbitmq_host: localhost
+mig_rabbitmq_port: 5672
+mig_rabbitmq_vhost: mig
+mig_rabbitmq_adminpass: xxx
+mig_rabbitmq_schedpass: xxx
+mig_rabbitmq_agentpass: xxx
+mig_rabbitmq_workrpass: xxx
+## for reference, not really useful for production obviously: http://serverfault.com/questions/235669/how-do-i-make-rabbitmq-listen-only-to-localhost
+
+mig_rabbitmq_certinfo: '/C=US/ST=CA/L=San Francisco/O=MIG Ansible'
+mig_rabbitmq_certduration: 1095
+mig_rabbitmq_rsakeysize: 2048
+mig_rabbitmq_cadir: "/home/{{ mig_user }}/ca"
+mig_rabbitmq_cakey: "{{ mig_rabbitmq_cadir }}/ca.key"
+mig_rabbitmq_cacertcrt: "{{ mig_rabbitmq_cadir }}/ca.crt"
+#mig_rabbitmq_cacert: "{{ mig_rabbitmq_cadir }}/cacert.cert"
+mig_rabbitmq_serverdir: "/home/{{ mig_user }}/server"
+mig_rabbitmq_serverkey: "{{ mig_rabbitmq_serverdir }}/server-{{ ansible_hostname }}.key"
+mig_rabbitmq_servercsr: "{{ mig_rabbitmq_serverdir }}/server-{{ ansible_hostname }}.csr"
+mig_rabbitmq_servercrt: "{{ mig_rabbitmq_serverdir }}/server-{{ ansible_hostname }}.crt"
+mig_rabbitmq_clientdir: "/home/{{ mig_user }}/client"
+
+#mig_rabbitmq_serverp12: "{{ mig_rabbitmq_serverdir }}/server-{{ ansible_hostname }}-keycert.p12"
+#mig_rabbitmq_clientkey: "{{ mig_rabbitmq_clientdir }}/client-{{ ansible_hostname }}.key"
+#mig_rabbitmq_clientreq: "{{ mig_rabbitmq_clientdir }}/client-{{ ansible_hostname }}-req.pem"
+#mig_rabbitmq_clientcert: "{{ mig_rabbitmq_clientdir }}/client-{{ ansible_hostname }}-cert.pem"
+#mig_rabbitmq_clientp12: "{{ mig_rabbitmq_clientdir }}/client-{{ ansible_hostname }}-keycert.p12"
+#mig_rabbitmq_keypass: MySecretPassword
+
+## To switch true, you need valid public signed certificate, not self-certificate
+mig_nginx_use_ssl: false
+mig_nginx_cert: /path/to/cert
+mig_nginx_key: /path/to/key
+
+## agent will use those proxy as rescue network access if direct access not working
+#mig_proxy_list: '{`proxy.example.net:3128`, `proxy2.example.net:8080`}'
+mig_proxy_list: ''
+mig_client_investigators:
+    - { realname: "MIG Example investigator", fingerprint: 'C070C873FDC2B5284C1D60089D6B3D2F773F5860', pubkeyfile: "files/vagrant.asc", pubkey: "{{ lookup('file', 'files/vagrant.asc') }}", weight: 2 }
+## Note: don't try to lookup on same line var or get:
+##   UnicodeDecodeError: 'utf8' codec can't decode byte 0x99 in position 0: invalid start byte
+## ex:
+##    - { realname: 'MIG Dupont Investigator', fingerprint: "{{ lookup('file', 'tmp/dupont-fingerprint') }}", pubkeyfile: "tmp/dupont.asc", pubkey: "{{ lookup('file', gpg_pubkeyfile) }}", weight: 2 }
+
+## if you want to set current user migrc?
+migrc_user_fingerprint:
+
+

@@ -1,0 +1,11 @@
+---
+
+- name: enable authentication for api
+  ini_file: dest=/etc/mig/api.cfg section="{{ item.s }}" option="{{ item.o }}" value="{{ item.v }}" mode=0600 owner="{{ mig_user }}" backup=yes
+  with_items:
+    - { s: 'authentication', o: 'enabled', v: 'on' }
+  become: yes
+  notify:
+    - restart supervisor
+  when: mig_enable_auth is defined and mig_enable_auth and investigatoradded is defined and investigatoradded.rc == 0
+

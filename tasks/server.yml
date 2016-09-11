@@ -1,0 +1,168 @@
+---
+- name: Check to see if specified Go version is already installed
+  stat: path=/usr/local/go-{{ mig_gover }}
+  register: go_installed
+
+- include: debian.yml
+  become: yes
+  when: (ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu')
+
+- include: redhat.yml
+  become: yes
+  when: ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- include: golang.yml
+  become: yes
+  when: not go_installed.stat.exists
+
+- debug: var=mig_user
+- fail: msg="mig_user is not defined or empty!"
+  when: mig_user is not defined or mig_user == ''
+
+- set_fact:
+    mig_home: '/root'
+  when: mig_user == 'root'
+- set_fact:
+    mig_home: "/home/{{ mig_user }}"
+  when: mig_user != 'root'
+
+- name: Add mig_user user
+  user: "name={{ mig_user }} home={{ mig_home }}"
+  become: yes
+
+- stat: path="{{ mig_home }}/.bashrc"
+  register: homemiguser
+#- debug: var=homemiguser
+
+## FIXME! not finding
+- name: Update PATH and GOPATH in bashrc - mig_user
+  lineinfile:
+    dest: "{{ item.d }}"
+    line: "{{ item.l }}"
+    regexp: "{{ item.r }}"
+    insertafter: EOF
+    state: present
+    create: False
+  with_items:
+    - { d: "{{ mig_home }}/.bashrc", r: "go/bin", l: 'export PATH=$PATH\:/usr/local/go/bin\:$HOME/go/bin' }
+    - { d: "{{ mig_home }}/.bashrc", r: "GOPATH={{ mig_gopath }}", l: "export GOPATH={{ mig_gopath }}" }
+## on centos7, missing this for fpm
+    - { d: "{{ mig_home }}/.bashrc", r: "/usr/local/bin", l: 'export PATH=$PATH\:/usr/local/bin' }
+  become: yes
+  become_user: "{{ mig_user }}"
+  when: homemiguser.stat.exists
+
+## http://mig.mozilla.org/doc/configuration.rst.html
+#- stat: path={{ mig_home }}/mig
+#  register: migrepo
+#- name: Git clone MIG
+#  git:
+#    #accept_hostkey=yes ## if using ssh
+#    repo=https://github.com/mozilla/mig.git
+#    dest={{ mig_home }}/mig
+#  become: yes
+#  become_user: "{{ mig_user }}"
+#  when: not migrepo.stat.exists
+
+- stat: path="{{ mig_src }}"
+  register: godir
+## FIXME! not idempotent
+## No Golang modules for ansible currently
+- name: Get mig repository through 'go get'
+  command: "{{ item }}"
+  with_items:
+    - "go get mig.ninja/mig"
+    - "go get mig.ninja/mig/client/mig-agent-search"
+#    - "go get code.google.com/p/winsvc/eventlog"
+#    - "go get github.com/golang/sys/tree/master/windows/svc/eventlog"   ## NOK/FIXME!
+    - "go get github.com/mozilla/masche/cresponse"
+## = dependencies where include as submodule in vendor/github.com
+### FIXME! mig/src/code.google.com/p/go.crypto/openpgp/read.go:198: multiple-value s.Decrypt() in single-value context
+##    - "go get -u code.google.com/p/go.crypto/openpgp"
+#    - "go get -u github.com/streadway/amqp"
+#    - "go get -u github.com/lib/pq"
+#    - "go get -u github.com/howeyc/fsnotify"
+#    - "go get -u code.google.com/p/gcfg"
+#    - "go get -u github.com/gorilla/mux"
+#    - "go get -u github.com/jvehent/cljs"
+#    - "go get -u bitbucket.org/kardianos/osext"
+#    - "go get -u bitbucket.org/kardianos/service"
+  become: yes
+  become_user: "{{ mig_user }}"
+  environment:
+    GOPATH: "{{ mig_gopath }}"
+  when: not godir.stat.exists
+
+- name: Build MIG platform
+  command: "make chdir={{ mig_src }} creates={{ mig_gopath }}/bin/linux/amd64/mig-scheduler"
+  environment:
+    GOPATH: "{{ mig_gopath }}"
+    #GOPATH: "{{ mig_gopath }}:{{ mig_src }}/vendor"
+  become: yes
+  become_user: "{{ mig_user }}"
+- name: Build MIG agent search
+  command: "make mig-agent-search chdir={{ mig_src }} creates={{ mig_gopath }}/bin/mig-agent-search"
+
+- file: dest="{{ mig_home }}" mode=0711 state=directory
+- file: "src={{ mig_src }}/bin/linux/amd64/mig-console dest=/usr/local/bin/mig-console state=link"
+- file: "src={{ mig_src }}/bin/linux/amd64/mig dest=/usr/local/bin/mig state=link"
+
+## either this or default make
+#- name: Build MIG components
+#  command: "make {{ item }} chdir={{ mig_src }}"
+#  with_items:
+#    - mig-scheduler
+#    - api
+#    - worker-agent-intel
+#    - worker-compliance-item
+#  environment:
+#    GOPATH: "{{ mig_gopath }}"
+#
+
+- name: Ensure mig configuration dir exists
+  file: "dest=/etc/mig state=directory mode=0750 owner=root group={{ mig_user }}"
+  become: yes
+
+- file: dest=/var/cache/mig owner={{ mig_user }} mode=0755 state=directory
+
+- include: server-api.yml
+
+- name: Ensure nrpe.d dir exists
+  file: dest=/etc/nagios/nrpe.d state=directory mode=0755
+  become: yes
+- name: add some nrpe commands for monitoring
+  copy: src=mig-nrpe.cfg dest=/etc/nagios/nrpe.d/mig-nrpe.cfg mode=0644 backup=yes
+  become: yes
+
+- set_fact:
+    migrc_user_fingerprint: "{{ mig_client_investigators.0.fingerprint }}"
+- name: create user migrc with first investigator
+  template: src=migrc dest="{{ mig_home }}/.migrc" mode=0600 owner="{{ mig_user }}"
+  become: yes
+  become_user: "{{ mig_user }}"
+  when: migrc_user_fingerprint is defined and migrc_user_fingerprint != ""
+
+- name: Manual restart before investigator creation
+  service: name="{{ item }}" state=restarted
+  with_items:
+    - nginx
+#    - rabbitmq-server
+  become: yes
+- name: Manual restart - sleep 5
+  service: name="{{ supervisor_service }}" state=restarted sleep=5
+  become: yes
+
+- name: add investigators inside mig
+  include: add-investigator.yml realname="{{ item.realname }}" pubkeyfile="{{ item.pubkeyfile }}"
+  with_items:
+    - "{{ mig_client_investigators }}"
+  become: yes
+  become_user: "{{ mig_user }}"
+
+- include: server-api-auth.yml
+  when: mig_server_roles is defined and (mig_server_roles == 'all' or mig_server_roles == 'api')
+
+- name: Ensure mig configuration dir exists
+  file: "dest=/etc/mig state=directory mode=0750 owner=root group={{ mig_user }}"
+  become: yes
+

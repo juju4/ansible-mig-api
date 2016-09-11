@@ -1,0 +1,85 @@
+---
+
+- stat: path="/etc/mig/api.cfg"
+  register: apicfg
+- name: Set API configuration
+  command: "rsync -ci {{ mig_src }}/conf/api.cfg.inc /etc/mig/api.cfg"
+  register: rsync_result
+  changed_when: 'rsync_result.stdout != ""'
+  become: yes
+  when: not apicfg.stat.exists
+
+- name: update api configuration
+  ini_file: dest=/etc/mig/api.cfg section="{{ item.s }}" option="{{ item.o }}" value="{{ item.v }}" mode=0600 owner="{{ mig_user }}" backup=yes
+  with_items:
+    - { s: 'postgres', o: 'host', v: "{{ mig_db_host }}" }
+    - { s: 'postgres', o: 'port', v: "{{ mig_db_port }}" }
+    - { s: 'postgres', o: 'password', v: "{{ mig_db_migapi_pass }}" }
+    - { s: 'server', o: 'ip', v: "{{ mig_api_host }}" }
+    - { s: 'server', o: 'port', v: "{{ mig_api_port }}" }
+    - { s: 'server', o: 'host', v: "{{ mig_url }}" }
+  become: yes
+  notify:
+    - restart supervisor
+
+- name: set nginx as reverse proxy to access MIG API - ssl
+  template: src=mig-ssl.conf dest={{ nginx_conf }}/mig-ssl.conf mode=0644
+  become: yes
+  notify:
+    - restart nginx
+  when: mig_nginx_use_ssl is defined and mig_nginx_use_ssl
+- name: active nginx configuration - ssl
+  file: src=/etc/nginx/sites-available/mig-ssl.conf dest=/etc/nginx/sites-enabled/mig-ssl.conf state=link
+  become: yes
+  notify:
+    - restart nginx
+  when: mig_nginx_use_ssl is defined and mig_nginx_use_ssl and (ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu')
+
+- name: set nginx as reverse proxy to access MIG API - no ssl
+  template: src=mig.conf dest={{ nginx_conf }}/mig.conf mode=0644
+  become: yes
+  notify:
+    - restart nginx
+  when: mig_nginx_use_ssl is defined and not mig_nginx_use_ssl
+- name: active nginx configuration - no ssl
+  file: src=/etc/nginx/sites-available/mig.conf dest=/etc/nginx/sites-enabled/mig.conf state=link
+  become: yes
+  notify:
+    - restart nginx
+  when: mig_nginx_use_ssl is defined and not mig_nginx_use_ssl and (ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu')
+
+- name: disable nginx default website
+  file: dest=/etc/nginx/sites-enabled/default state=absent
+  become: yes
+  notify:
+    - restart nginx
+
+- include: nginx-robots.yml
+
+- name: set supervisor config to manage MIG daemons
+  template: src=supervisord-api.ini.j2 dest={{ supervisor_confdir }}/supervisord-api.{{ supervisor_ext }} mode=0644
+  become: yes
+  notify:
+    - restart supervisor
+
+- name: Ensure supervisor is enabled and started
+  service: name="{{ supervisor_service }}" state=started enabled=yes
+  become: yes
+- name: Ensure nginx is enabled and started
+  service: name=nginx state=started enabled=yes
+  become: yes
+
+- name: Manual restart before investigator creation
+  service: name="{{ item }}" state=restarted
+  with_items:
+    - nginx
+  become: yes
+- name: Manual restart - sleep 5
+  service: name="{{ supervisor_service }}" state=restarted sleep=5
+  become: yes
+
+- name: check config permissions
+  file: "dest={{ item }} state=file mode=0440 owner={{ mig_user }} group=root"
+  with_items:
+    - /etc/mig/api.cfg
+

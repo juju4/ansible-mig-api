@@ -91,6 +91,7 @@
   become_user: "{{ mig_user }}"
   environment:
     GOPATH: "{{ mig_gopath }}"
+    GOROOT: "{{ mig_goroot }}"
   when: not godir.stat.exists
 
 - name: Build MIG platform
@@ -98,6 +99,7 @@
   environment:
     GOPATH: "{{ mig_gopath }}"
     #GOPATH: "{{ mig_gopath }}:{{ mig_src }}/vendor"
+    GOROOT: "{{ mig_goroot }}"
   become: yes
   become_user: "{{ mig_user }}"
 - name: Build MIG agent search

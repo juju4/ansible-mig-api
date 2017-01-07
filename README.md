@@ -145,6 +145,15 @@ Ensure fingerprint inside .migrc is consistent with your secret keys
 $ gpg --fingerprint EMAIL | awk -F= '/Key fingerprint/ { gsub(/ /,"", $2); print $2 }'
 ```
 
+* fail to create investigator
+```
+curl -q -F 'name=MIG dupond Investigator' -F publickey=@/tmp/dupont.asc -F 'isadmin=false' http://10.252.116.58:1664/api/v1/investigator/create/
+{"collection":{"version":"1.0","href":"http://10.252.116.58:1664/api/v1/investigator/create/","template":{},"error":{"code":"7078220333064","message":"unexpected end of JSON input"}}}
+```
+in /var/log/supervisor/mig-api.log
+```
+2016/01/30 11:22:23 7078220333064 - - [info] src=10.252.116.58 category=investigator auth=[authdisabled 0] POST HTTP/1.1 /api/v1/investigator/create/ resp_code=500 resp_size=183 user-agent=curl/7.47.0
+```
 
 ## License
 

@@ -69,14 +69,14 @@
   service: name=nginx state=started enabled=yes
   become: yes
 
-- name: Manual restart before investigator creation
-  service: name="{{ item }}" state=restarted
-  with_items:
-    - nginx
-  become: yes
-- name: Manual restart - sleep 5
-  service: name="{{ supervisor_service }}" state=restarted sleep=5
-  become: yes
+#- name: Manual restart before investigator creation
+#  service: name="{{ item }}" state=restarted
+#  with_items:
+#    - nginx
+#  become: yes
+#- name: Manual restart - sleep 5
+#  service: name="{{ supervisor_service }}" state=restarted sleep=5
+#  become: yes
 
 - name: check config permissions
   file: "dest={{ item }} state=file mode=0440 owner={{ mig_user }} group=root"

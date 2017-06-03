@@ -55,6 +55,17 @@ keyUsage                        = keyCertSign, cRLSign
 [v3_req]
 basicConstraints    = CA:FALSE
 keyUsage        = digitalSignature, keyEncipherment
+## http://wiki.cacert.org/FAQ/subjectAltName
+## https://www.reddit.com/r/sysadmin/comments/677hep/chrome_58_not_supporting_self_signed_certificates/
+##
+subjectAltName  = @alt_names
+
+[alt_names]
+{% if mig_api_cert_san is defined and mig_api_cert_san != [] %}
+{% for e in mig_api_cert_san %}
+{{ e }}
+{% endfor %}
+{% endif %}
 
 [ server_cert ]
 authorityKeyIdentifier  = keyid,issuer:always

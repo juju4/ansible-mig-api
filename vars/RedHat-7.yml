@@ -1,0 +1,28 @@
+---
+
+mig_api_pkgs:
+    - git
+    - readline-devel
+    - mercurial
+    - python-psycopg2
+    - gnupg2
+    - nginx
+    - supervisor
+    - gcc
+## more entropy? one or the other?
+    - haveged
+#    - rng-tools
+## agent packaging
+    - ruby
+    - ruby-devel
+    - rpm-build
+    - curl
+## for wixl, but versions too low on centos7.1 and still missing libgcab
+#    - intltool
+#    - glib2-devel
+#    - cairo-gobject-devel libgsf-devel libuuid-devel
+
+nginx_conf: /etc/nginx/conf.d
+supervisor_confdir: /etc/supervisord.d
+supervisor_ext: ini
+supervisor_service: supervisord

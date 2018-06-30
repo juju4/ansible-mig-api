@@ -1,0 +1,26 @@
+---
+
+mig_api_pkgs:
+    - git
+    - make
+    - libreadline-dev
+    - mercurial
+    - python-psycopg2
+    - gpgv2
+    - nginx
+    - supervisor
+    - rng-tools
+## agent packaging
+    - ruby
+    - ruby-dev
+    - librpmbuild8
+    - rpm
+    - curl
+#   - wixl          ## FIXME! only on debian sid/stretch or ubuntu wily (Windows packaging in msi)
+# from source, need multiple dependencies bump and missing libgcab ...
+#   - intltool libglib2.0-dev libavahi-gobject-dev libgsf-1-dev uuid-dev
+
+nginx_conf: /etc/nginx/sites-available
+supervisor_confdir: /etc/supervisor/conf.d
+supervisor_ext: conf
+supervisor_service: supervisor

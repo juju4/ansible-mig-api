@@ -7,5 +7,12 @@
 #    mig_url: "https://{{ mig_api_host }}"
 #  when: mig_nginx_use_ssl is defined and mig_nginx_use_ssl
 
+- name: Include version-specific variables for Ubuntu.
+  include_vars: "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
+  when: ansible_distribution == 'Ubuntu'
+- name: Include version-specific variables for RedHat
+  include_vars: "RedHat-{{ ansible_distribution_version.split('.')[0] }}.yml"
+  when: ansible_os_family == "RedHat"
+
 - include: server.yml
 

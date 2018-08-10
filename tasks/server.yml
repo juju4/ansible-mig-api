@@ -71,7 +71,8 @@
 - name: Get mig repository through 'go get'
   command: "{{ item }}"
   with_items:
-    - "go get mig.ninja/mig"
+#    - "go get mig.ninja/mig"
+    - go get github.com/mozilla/mig
     - "go get mig.ninja/mig/client/mig-agent-search"
 #    - "go get code.google.com/p/winsvc/eventlog"
 #    - "go get github.com/golang/sys/tree/master/windows/svc/eventlog"   ## NOK/FIXME!

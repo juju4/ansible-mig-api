@@ -3,9 +3,10 @@
 - stat: path="/etc/mig/api.cfg"
   register: apicfg
 - name: Set API configuration
-  command: "rsync -ci {{ mig_src }}/conf/api.cfg.inc /etc/mig/api.cfg"
-  register: rsync_result
-  changed_when: 'rsync_result.stdout != ""'
+  copy:
+    src: "{{ mig_src }}/conf/api.cfg.inc"
+    dest: /etc/mig/api.cfg
+    remote_src: true
   become: yes
   when: not apicfg.stat.exists
 

@@ -29,3 +29,4 @@ galaxy_info:
 dependencies:
   - juju4.redhat-epel
   - juju4.golang
+  - juju4.mig-postgres

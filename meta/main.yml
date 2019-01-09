@@ -27,6 +27,6 @@ galaxy_info:
   - web
   - security
 dependencies:
-  - juju4.redhat-epel
+  - juju4.redhat_epel
   - juju4.golang
   - juju4.mig-postgres

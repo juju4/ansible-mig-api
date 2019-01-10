@@ -67,7 +67,7 @@
 #    - "go get mig.ninja/mig"
     - go get github.com/mozilla/mig
     - go get github.com/mozilla/gozdef
-    - "go get mig.ninja/mig/client/mig-agent-search"
+#    - "go get mig.ninja/mig/client/mig-agent-search"
 #    - "go get code.google.com/p/winsvc/eventlog"
 #    - "go get github.com/golang/sys/tree/master/windows/svc/eventlog"   ## NOK/FIXME!
     - "go get github.com/mozilla/masche/cresponse"

@@ -149,4 +149,3 @@
 
 #- name: retrieve mig-agent to deploy? what about libraries? (vdso, pthread, c)
 #  fetch: src="{{ mig_src }}/bin/linux/amd64/mig-agent-latest" dest=migagent flat=yes
-

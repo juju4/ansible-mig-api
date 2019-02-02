@@ -15,4 +15,3 @@
   when: ansible_os_family == "RedHat"
 
 - include: server.yml
-

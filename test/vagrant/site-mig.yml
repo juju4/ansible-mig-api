@@ -2,5 +2,4 @@
 
 - hosts: all
   roles:
-    - mig-api
-
+    - juju4.mig-api

@@ -6,11 +6,11 @@
 
 - include: redhat.yml
   become: yes
-  when: ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_os_family == "RedHat"
 
 - debug: var=mig_user
 - fail: msg="mig_user is not defined or empty!"
-  when: mig_user is not defined or mig_user == ''
+  when: mig_user is not defined or not mig_user
 
 - set_fact:
     mig_home: '/root'
@@ -172,4 +172,3 @@
 - name: Ensure mig configuration dir exists
   file: "dest=/etc/mig state=directory mode=0750 owner=root group={{ mig_user }}"
   become: yes
-

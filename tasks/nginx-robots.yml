@@ -5,4 +5,3 @@
 - file: dest=/var/www state=directory mode=0755
 - name: set robots.txt
   copy: src=robots-disallow-all.txt dest=/var/www/robots.txt mode=0644
-

@@ -11,7 +11,14 @@
   when: not apicfg.stat.exists
 
 - name: update api configuration
-  ini_file: dest=/etc/mig/api.cfg section="{{ item.s }}" option="{{ item.o }}" value="{{ item.v }}" mode=0600 owner="{{ mig_user }}" backup=yes
+  ini_file:
+    dest: /etc/mig/api.cfg
+    section: "{{ item.s }}"
+    option: "{{ item.o }}"
+    value: "{{ item.v }}"
+    mode: '0600'
+    owner: "{{ mig_user }}"
+    backup: yes
   with_items:
     - { s: 'postgres', o: 'host', v: "{{ mig_db_host }}" }
     - { s: 'postgres', o: 'port', v: "{{ mig_db_port }}" }
@@ -34,7 +41,9 @@
   become: yes
   notify:
     - restart nginx
-  when: mig_nginx_use_ssl is defined and mig_nginx_use_ssl and (ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu')
+  when: >
+    mig_nginx_use_ssl is defined and mig_nginx_use_ssl and
+    (ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu')
 
 - name: set nginx as reverse proxy to access MIG API - no ssl
   template: src=mig.conf dest={{ nginx_conf }}/mig.conf mode=0644
@@ -47,7 +56,9 @@
   become: yes
   notify:
     - restart nginx
-  when: mig_nginx_use_ssl is defined and not mig_nginx_use_ssl and (ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu')
+  when: >
+    mig_nginx_use_ssl is defined and not mig_nginx_use_ssl and
+    (ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu')
 
 - name: disable nginx default website
   file: dest=/etc/nginx/sites-enabled/default state=absent
@@ -83,4 +94,3 @@
   file: "dest={{ item }} state=file mode=0440 owner={{ mig_user }} group=root"
   with_items:
     - /etc/mig/api.cfg
-

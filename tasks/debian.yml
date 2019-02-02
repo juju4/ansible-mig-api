@@ -1,5 +1,4 @@
 ---
 
 - name: apt | MIG dependencies
-  apt: name={{item}} state=present update_cache=yes
-  with_items: "{{ mig_api_pkgs }}"
+  apt: name={{ mig_api_pkgs }} state=present update_cache=yes

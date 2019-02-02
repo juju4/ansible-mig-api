@@ -1,8 +1,7 @@
 ---
 
 - name: yum | mig dependencies install
-  yum: name={{item}} state=present update_cache=yes
-  with_items: "{{ mig_api_pkgs }}"
+  yum: name={{ mig_api_pkgs }} state=present update_cache=yes
 
 - name: yum | Ensure haveged is running and enabled on boot.
   service: name=haveged state=started enabled=yes
@@ -19,4 +18,3 @@
   when: mig_nginx_use_ssl is defined and not mig_nginx_use_ssl
   notify:
     - restart nginx
-

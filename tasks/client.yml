@@ -25,7 +25,7 @@
   when: (ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu')
 - set_fact:
     mig_agent_pkg: "{{ mig_src }}/mig-agent-latest-{{ ansible_architecture }}.rpm"
-  when: (ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux')
+  when: ansible_os_family == "RedHat"
 
 - name: retrieve mig-agent archive if remote on orchestrator
   fetch: src="{{ mig_agent_pkg }}" dest=tmp/ flat=yes
@@ -44,7 +44,7 @@
   when: (ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu')
 - name: yum | mig-agent install
   yum: name="{{ mig_agent_pkg }}" state=present
-  when: ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_os_family == "RedHat"
 
 ## debian /agent_install.sh
 - name: get mig-agent path
@@ -75,5 +75,3 @@
   template: src=supervisord-migagent.ini dest={{ supervisor_confdir }}/migagent.{{ supervisor_ext }} mode=0644
   notify:
     - restart supervisor
-
-

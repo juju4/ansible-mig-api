@@ -1,5 +1,6 @@
 ---
 galaxy_info:
+  role_name: mig-api
   author: juju4
   description: Mozilla Investi Gator - API server
   license: BSD

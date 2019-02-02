@@ -100,11 +100,11 @@
     GOROOT: "{{ mig_goroot }}"
   become: yes
   become_user: "{{ mig_user }}"
-- name: Build MIG agent search
-  command: "make mig-agent-search"
-  args:
-    chdir: "{{ mig_src }}"
-    creates: "{{ mig_gopath }}/bin/mig-agent-search"
+#- name: Build MIG agent search
+#  command: "make mig-agent-search"
+#  args:
+#    chdir: "{{ mig_src }}"
+#    creates: "{{ mig_gopath }}/bin/mig-agent-search"
 
 - name: Check mig home permissions
   file: dest="{{ mig_home }}" mode=0711 state=directory

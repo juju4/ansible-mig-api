@@ -1,3 +1,6 @@
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
+# DEPRECATED/LOOKING FOR MAINTAINERS -> archived
+
 [![Build Status - Master](https://travis-ci.org/juju4/ansible-mig-api.svg?branch=master)](https://travis-ci.org/juju4/ansible-mig-api)
 [![Build Status - Devel](https://travis-ci.org/juju4/ansible-mig-api.svg?branch=devel)](https://travis-ci.org/juju4/ansible-mig-api/branches)
 # MIG ansible role: mig-api service

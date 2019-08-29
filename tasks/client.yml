@@ -9,15 +9,15 @@
   when: ansible_system == 'Linux'
 - set_fact:
     mig_sys: windows
-  when: ansible_system == 'Windows'
+  when: ansible_system == 'Win32NT'
 
 - name: decide mig_agent_bin
   set_fact:
     mig_agent_bin: "{{ mig_src }}/{{ mig_sys }}/{{ mig_arch }}/mig-agent-latest"
-  when: ansible_system != 'Windows'
+  when: ansible_system != 'Win32NT'
 - set_fact:
     mig_agent_bin: "{{ mig_src }}/{{ mig_sys }}/{{ mig_arch }}/mig-agent-latest.exe"
-  when: ansible_system == 'Windows'
+  when: ansible_system == 'Win32NT'
 
 - name: decide mig_agent_pkg
   set_fact:
